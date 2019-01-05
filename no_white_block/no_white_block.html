@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>别踩白块</title>
+</head>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+}
+.box {
+    margin: 50px auto 0 auto;
+    width: 400px;
+    height: auto;
+    border: solid 1px #222;
+}
+
+#cont {
+    width: 400px;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+}
+
+#go {
+    width: 100%;
+    height: 600px;
+    position: absolute;
+    top: 0;
+    font: 700 60px '微软雅黑';
+    text-align: center;
+    z-index: 99;
+}
+
+#go span {
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: solid 1px #222;
+}
+
+#main {
+    width: 400px;
+    height: 400px;
+    position: relative;
+    top: -150px;
+}
+
+.row {
+    width: 400px;
+    height: 150px;
+}
+
+.row div {
+    width: 99px;
+    height: 149px;
+    border: solid 1px #222;
+    float: left;
+    border-top-width: 0;
+    border-left-width: 0;
+    cursor: pointer;
+}
+
+#count {
+    border-top: solid 1px #222;
+    width: 400px;
+    height: 50px;
+    font: 700 36px/50px '微软雅黑';
+    text-align: center;
+}
+
+</style>
+<body>
+    <div class="box">
+        <div id="cont">
+            <div id="go">
+                <span>点击开始</span>
+            </div>
+            <div id="main"></div>
+        </div>
+        <div id="count"></div>
+    </div>
+</body>
+
+<script>
+   var main = document.getElementById('main')
+   go = document.getElementById('go')
+   count = document.getElementById('count');
+
+   cols = ['#1AAB8A', '#E15650', '#121B39', '#80A84E'];
+
+   function CDiv(classname) {
+    var Div = document.createElement('div')
+    index = Math.floor(Math.random() * 4)
+    Div.className = classname
+    for (var i = 0; i < 4; i++) {
+        var iDiv = document.createElement('div')
+        Div.appendChild(iDiv)
+    }
+
+    if (main.children.length == 0) {
+        main.appendChild(Div);
+    } else {
+        main.insertBefore(Div, main.children[0]);
+    }
+
+    Div.children[index].style.backgroundColor = cols[index];
+    Div.children[index].className = "i";
+}
+
+function move(obj) {
+        //默认速度与计分
+        var speed = 5, num = 0;
+        obj.timer = setInterval(function () {
+            //速度
+            var step = parseInt(getComputedStyle(obj, null)['top']) + speed;
+            obj.style.top = step + 'px'
+            if (parseInt(getComputedStyle(obj, null)['top']) >= 0) {
+                CDiv('row');
+                obj.style.top = -150 + 'px';
+            }
+            if (obj.children.length == 6) {
+                for (var i = 0; i < 4; i++) {
+                    if (obj.children[obj.children.length - 1].children[i].className == 'i') {
+                        //游戏结束
+                        obj.style.top = '-150px';
+                        count.innerHTML = '游戏结束,最高得分: ' + num;
+                        //关闭定时器
+                        clearInterval(obj.timer);
+                        //显示开始游戏
+                        go.children[0].innerHTML = '游戏结束';
+                        go.style.display = "block";
+                    }
+
+                }
+
+                obj.removeChild(obj.children[obj.children.length - 1]);
+            }
+            //点击与计分
+            obj.onmousedown = function (event) {
+                //点击的不是白盒子
+                 // 兼容IE
+
+            event = event || window.event;
+
+            if ((event.target ? event.target : event.srcElement).className == 'i') {
+                    //点击后的盒子颜色
+                    (event.target ? event.target : event.srcElement).style.backgroundColor = "#bbb";
+            //清除盒子标记
+            (event.target ? event.target : event.srcElement).className = '';
+            //计分
+
+            num=num+5;
+
+            //显示得分
+
+            count.innerHTML = '当前得分: ' + num;
+        }
+
+        else {
+                    //游戏结束
+                    obj.style.top = 0;
+                    count.innerHTML = '游戏结束,最高得分: ' + num;
+                    //关闭定时器
+
+                    clearInterval(obj.timer);
+
+                    //显示开始游戏
+
+                    go.children[0].innerHTML = '游戏结束';
+
+                    go.style.display = "block";
+
+            }
+                //盒子加速
+                if (num % 10 == 0) {
+                    speed++;
+                }
+            }
+            //松开触发停止
+            obj.onmouseup = function (event) {
+            }
+        }, 20)
+    }
+
+    go.children[0].onclick = function () {
+        if (main.children.length) {
+            //暴力清楚main里面所有盒子
+            main.innerHTML = '';
+        }
+        //清空计分
+        count.innerHTML = '游戏开始';
+        //隐藏开始盒子
+        this.parentNode.style.display = "none";
+        move(main);
+    }
+
+</script>
+</html>
